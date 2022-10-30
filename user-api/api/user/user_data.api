@@ -11,10 +11,11 @@ info(
 type (
     RegisterReq {
         Mobile string `json:"mobile"`
-        Name string `json:"name"`
-        Age int64 `json:"age"`
-        Gender int64 `json:"gender"`
         Password string `json:"password"`
+        Nickname string `json:"nickname"`
+        Sex int64 `json:"sex"`
+        Avatar string `json:"avatar"`
+        Info string `json:"info"`
     }
     RegisterResp {
         Id int64 `json:"id"`
@@ -25,12 +26,12 @@ type (
 )
 
 type (
- UserInfoGetRpcRequest {
-    UserId int64  `form:"userId"`
-    Name   string `form:"name"`
-}
-UserInfoGetRpcResponse {
-    Id   int64  `json:"id"`
-    Name string `json:"name"`
-}
+     UserInfoGetRpcRequest {
+        UserId int64  `form:"userId"`
+        Nickname   string `form:"nickname" validate:"omitempty,gte=4" label:"姓名"`
+     }
+     UserInfoGetRpcResponse {
+        Id   int64  `json:"id"`
+        Nickname string `json:"nickname"`
+     }
 )

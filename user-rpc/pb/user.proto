@@ -8,11 +8,11 @@ package pb;
 //model
 message User {
   int64  id = 1;
-  string name = 2;
+  string nickname = 2;
 }
 message GetUserInfoReq {
   int64  id = 1;
-  string  name = 2;
+  string nickname = 2;
 }
 message GetUserInfoResp {
   User user = 1;

@@ -27,8 +27,8 @@ func NewUserInfoRpcGetLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Us
 
 func (l *UserInfoRpcGetLogic) UserInfoRpcGet(req *types.UserInfoGetRpcRequest) (resp *types.UserInfoGetRpcResponse, err error) {
 	userInfoResp, err := l.svcCtx.UsercenterRpc.GetUserInfo(l.ctx, &usercenter.GetUserInfoReq{
-		Id:   req.UserId,
-		Name: req.Name,
+		Id:       req.UserId,
+		Nickname: req.Nickname,
 	})
 	if err != nil {
 		return nil, err

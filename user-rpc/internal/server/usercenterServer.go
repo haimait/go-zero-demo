@@ -5,7 +5,6 @@ package server
 
 import (
 	"context"
-
 	"go-zero-demo/user-rpc/internal/logic"
 	"go-zero-demo/user-rpc/internal/svc"
 	"go-zero-demo/user-rpc/pb"
@@ -24,5 +23,6 @@ func NewUsercenterServer(svcCtx *svc.ServiceContext) *UsercenterServer {
 
 func (s *UsercenterServer) GetUserInfo(ctx context.Context, in *pb.GetUserInfoReq) (*pb.GetUserInfoResp, error) {
 	l := logic.NewGetUserInfoLogic(ctx, s.svcCtx)
-	return l.GetUserInfo(in)
+	resp, err := l.GetUserInfo(in)
+	return resp, err
 }

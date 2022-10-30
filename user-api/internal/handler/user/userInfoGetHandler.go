@@ -28,6 +28,7 @@ func UserInfoGetHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		l := user.NewUserInfoGetLogic(r.Context(), svcCtx)
 		resp, err := l.UserInfoGet(&req)
+
 		response.Response(w, resp, err) //②
 	}
 }

@@ -2,8 +2,9 @@ package user
 
 import (
 	"context"
-	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
+
+	"github.com/jinzhu/copier"
 	"go-zero-demo/model"
 	"go-zero-demo/user-api/internal/svc"
 	"go-zero-demo/user-api/internal/types"
@@ -28,7 +29,7 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 func (l *RegisterLogic) Register(req *types.RegisterReq) (resp *types.RegisterResp, err error) {
 	var user model.User
 	_ = copier.Copy(&user, req)
-	insert, err := l.svcCtx.UserModel.Insert(l.ctx, &user)
+	insert, err := l.svcCtx.UserModel.Insert(l.ctx, nil, &user)
 	if err != nil {
 		return nil, errors.Wrapf(err, "UserModel.Insert failed err:%v,user:%+v", err, user)
 	}

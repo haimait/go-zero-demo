@@ -2,8 +2,8 @@
 package types
 
 type UserInfoGetRequest struct {
-	UserId int64  `form:"userId" validate:"required,gte=0" label:"用戶id"`
-	Name   string `form:"name" validate:"omitempty,gte=4" label:"姓名"`
+	UserId   int64  `form:"userId" validate:"required,gte=0" label:"用戶id"`
+	Nickname string `form:"nickname" validate:"omitempty,gte=4" label:"姓名"`
 }
 
 type UserInfoGetResponse struct {
@@ -39,10 +39,11 @@ type UserDeleteResponse struct {
 
 type RegisterReq struct {
 	Mobile   string `json:"mobile"`
-	Name     string `json:"name"`
-	Age      int64  `json:"age"`
-	Gender   int64  `json:"gender"`
 	Password string `json:"password"`
+	Nickname string `json:"nickname"`
+	Sex      int64  `json:"sex"`
+	Avatar   string `json:"avatar"`
+	Info     string `json:"info"`
 }
 
 type RegisterResp struct {
@@ -53,11 +54,11 @@ type RegisterResp struct {
 }
 
 type UserInfoGetRpcRequest struct {
-	UserId int64  `form:"userId"`
-	Name   string `form:"name"`
+	UserId   int64  `form:"userId"`
+	Nickname string `form:"nickname" validate:"omitempty,gte=4" label:"姓名"`
 }
 
 type UserInfoGetRpcResponse struct {
-	Id   int64  `json:"id"`
-	Name string `json:"name"`
+	Id       int64  `json:"id"`
+	Nickname string `json:"nickname"`
 }

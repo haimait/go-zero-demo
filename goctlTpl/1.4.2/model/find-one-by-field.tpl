@@ -1,4 +1,4 @@
-
+//根据唯一索引查询一条数据，走缓存
 func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx context.Context, {{.in}}) (*{{.upperStartCamelObject}}, error) {
 	{{if .withCache}}{{.cacheKey}}
 	var resp {{.upperStartCamelObject}}

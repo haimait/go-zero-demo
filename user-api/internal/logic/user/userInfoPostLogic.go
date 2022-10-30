@@ -45,7 +45,7 @@ func (l *UserInfoPostLogic) UserInfoPost(req *types.UserInfoPostRequest) (resp *
 
 	return &types.UserInfoPostResponse{
 		UserId:   respUser.Id,
-		Nickname: respUser.Name,
+		Nickname: respUser.Nickname,
 	}, nil
 
 	//users := map[int64]string{

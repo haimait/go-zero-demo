@@ -2,13 +2,12 @@ package user
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"go-zero-demo/model"
 	"go-zero-demo/user-api/internal/svc"
 	"go-zero-demo/user-api/internal/types"
 
 	"github.com/jinzhu/copier"
-	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -29,22 +28,19 @@ func NewUserInfoGetLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserI
 func (l *UserInfoGetLogic) UserInfoGet(req *types.UserInfoGetRequest) (resp *types.UserInfoGetResponse, err error) {
 	// todo: add your logic here and delete this line
 	//return nil, errorx.NewDefaultError("用户名不存在")
-	fmt.Println("req:get-->", req)
 	user, err := l.svcCtx.UserModel.FindOne(l.ctx, req.UserId)
-	fmt.Printf("user:%+v", user)
-	fmt.Println("err:-->", err)
 	if err != nil && err != model.ErrNotFound {
-		return nil, errors.Wrapf(errors.New("查询用户出错"), "查询用户出错 id:%d , err:%v", req.UserId, err)
+		return nil, errors.New("查询用户出错")
 	}
 	if user == nil {
-		return nil, errors.Wrapf(model.ErrNotFound, "id-->:%d", req.UserId)
+		return nil, errors.New("用户不存在")
 	}
 	var respUser model.User
 	_ = copier.Copy(&respUser, user)
 
 	return &types.UserInfoGetResponse{
 		UserId:   respUser.Id,
-		Nickname: respUser.Name,
+		Nickname: respUser.Nickname,
 	}, nil
 
 	//users := map[int64]string{

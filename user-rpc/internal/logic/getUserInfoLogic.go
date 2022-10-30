@@ -31,8 +31,6 @@ func (l *GetUserInfoLogic) GetUserInfo(in *pb.GetUserInfoReq) (*pb.GetUserInfoRe
 	// todo: add your logic here and delete this line
 	fmt.Println("in:get-->", in)
 	user, err := l.svcCtx.UserModel.FindOne(l.ctx, in.Id)
-	fmt.Printf("user:%+v", user)
-	fmt.Println("err:-->", err)
 	if err != nil && err != model.ErrNotFound {
 		return nil, errors.Wrapf(errors.New("查询用户出错"), "查询用户出错 id:%d , err:%v", in.Id, err)
 	}
@@ -43,10 +41,7 @@ func (l *GetUserInfoLogic) GetUserInfo(in *pb.GetUserInfoReq) (*pb.GetUserInfoRe
 	//var respUser model.User
 	var respUser pb.User
 	_ = copier.Copy(&respUser, user)
-
-	return &pb.GetUserInfoResp{
-		User: &respUser,
-	}, nil
-
-	//return &pb.GetUserInfoResp{}, nil
+	var u pb.GetUserInfoResp
+	u.User = &respUser
+	return &u, nil
 }

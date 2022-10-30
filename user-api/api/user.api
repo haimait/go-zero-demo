@@ -1,0 +1,77 @@
+syntax = "v1"
+
+info(
+	author: "user-api"
+	date:   "2022-03-26"
+	desc:   "api语法示例及语法说明"
+)
+
+import (
+	"user/user_data.api"
+)
+
+type UserInfoGetRequest {
+	UserId int64  `form:"userId" validate:"required,gte=0" label:"用戶id"`
+	Name   string `form:"name" validate:"required,gte=5" label:"姓名"`
+}
+
+type UserInfoGetResponse {
+	UserId   int64  `json:"userId"`
+	Nickname string `json:"nickname"`
+}
+
+type UserInfoPostRequest {
+	UserId int64 `json:"userId"`
+}
+
+type UserInfoPostResponse {
+	UserId   int64  `json:"userId"`
+	Nickname string `json:"nickname"`
+}
+type UserUpdateRequest {
+	UserId   int64  `json:"userId"`
+	Nickname string `json:"nickname"`
+}
+
+type UserUpdateResponse {
+	Flag bool `json:"flag"`
+}
+type UserDeleteRequest {
+	UserId int64 `json:"userId"`
+}
+
+type UserDeleteResponse {
+	Flag bool `json:"flag"`
+}
+
+// service block
+@server(
+	group: user
+	prefix: api/v1
+)
+
+service user-api{
+	@doc "获取用户信息get"
+	@handler userInfoGet
+	get /user/info_get (UserInfoGetRequest) returns (UserInfoGetResponse)
+	
+	@doc "获取用户信息Rpc-get"
+	@handler userInfoRpcGet
+	get /user/info_get_rpc (UserInfoGetRpcRequest) returns (UserInfoGetRpcResponse)
+	
+	@doc "获取用户信息post"
+	@handler userInfoPost
+	post /user/info_post (UserInfoPostRequest) returns (UserInfoPostResponse)
+	
+	@doc "注册"
+	@handler register
+	post /user/register (RegisterReq) returns (RegisterResp)
+	
+	@doc "修改用户信息"
+	@handler upDateUser
+	post /user/update (UserUpdateRequest) returns (UserUpdateResponse)
+	
+	@doc "删除用户信息"
+	@handler deleteUser
+	delete /user/delete (UserDeleteRequest) returns (UserDeleteResponse)
+}

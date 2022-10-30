@@ -1,0 +1,22 @@
+Name: user-api
+Host: 0.0.0.0
+Port: 8888
+Timeout: 20000
+
+Redis:
+  Host: 127.0.0.1:6379
+  Type: node
+  Pass:
+
+DB:
+  DataSource: root:123456@tcp(127.0.0.1:3306)/go-zero-demo?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+
+Cache:
+  - Host: 127.0.0.1:6379
+    Pass:
+      
+#rpc service
+UsercenterRpcConf:
+  Endpoints:
+    - 127.0.0.1:8080
+  NonBlock: true

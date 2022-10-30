@@ -1,0 +1,36 @@
+syntax = "v1"
+
+info(
+    title: "用户实例"
+    desc: "用户实例"
+    author: "Mikael"
+    email: "13247629622@163.com"
+)
+
+
+type (
+    RegisterReq {
+        Mobile string `json:"mobile"`
+        Name string `json:"name"`
+        Age int64 `json:"age"`
+        Gender int64 `json:"gender"`
+        Password string `json:"password"`
+    }
+    RegisterResp {
+        Id int64 `json:"id"`
+        AccessToken string `json:"accessToken"`
+        AccessExpire int64 `json:"accessExpire"`
+        RefreshAfter int64 `json:"refreshAfter"`
+    }
+)
+
+type (
+ UserInfoGetRpcRequest {
+    UserId int64  `form:"userId"`
+    Name   string `form:"name"`
+}
+UserInfoGetRpcResponse {
+    Id   int64  `json:"id"`
+    Name string `json:"name"`
+}
+)

@@ -3,7 +3,7 @@ package types
 
 type UserInfoGetRequest struct {
 	UserId int64  `form:"userId" validate:"required,gte=0" label:"用戶id"`
-	Name   string `form:"name" validate:"required,gte=5" label:"姓名"`
+	Name   string `form:"name" validate:"omitempty,gte=4" label:"姓名"`
 }
 
 type UserInfoGetResponse struct {

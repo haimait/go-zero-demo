@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"fmt"
-	"go-zero-demo/common/errorx"
 	"go-zero-demo/model"
 	"go-zero-demo/user-api/internal/svc"
 	"go-zero-demo/user-api/internal/types"
@@ -29,7 +28,7 @@ func NewUserInfoGetLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserI
 
 func (l *UserInfoGetLogic) UserInfoGet(req *types.UserInfoGetRequest) (resp *types.UserInfoGetResponse, err error) {
 	// todo: add your logic here and delete this line
-	return nil, errorx.NewDefaultError("用户名不存在")
+	//return nil, errorx.NewDefaultError("用户名不存在")
 	fmt.Println("req:get-->", req)
 	user, err := l.svcCtx.UserModel.FindOne(l.ctx, req.UserId)
 	fmt.Printf("user:%+v", user)

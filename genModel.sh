@@ -25,8 +25,8 @@ echo "开始创建库：$dbname 的表：$2"
 #goctl model mysql datasource -url="${username}:${passwd}@tcp(${host}:${port})/${dbname}" -table="${tables}"  -dir="${modeldir}/cache-model" -cache=true --style=goZero
 
 # 不带缓存
-goctl model mysql datasource -url="${username}:${passwd}@tcp(${host}:${port})/${dbname}" -table="${tables}"  -dir="${modeldir}/no-cache-model" --style=goZero
+#goctl model mysql datasource -url="${username}:${passwd}@tcp(${host}:${port})/${dbname}" -table="${tables}"  -dir="${modeldir}/no-cache-model" --style=goZero
 # 指定模板生成 --home=
 # 指定生成模板 goctl template init 会生成在~/.goctl/goctl版本号/handler.tpl 目录里 ，默认使用用户家目标里的模板
 # 可以指定模板目标 --home=./goctlTpl  这里写相对路径
-#goctl model mysql datasource -url="${username}:${passwd}@tcp(${host}:${port})/${dbname}" -table="${tables}"  -dir="${modeldir}/no-cache-model" --style=goZero --home=./goctlTpl
+goctl model mysql datasource -url="${username}:${passwd}@tcp(${host}:${port})/${dbname}" -table="${tables}"  -dir="${modeldir}/no-cache-model" --style=goZero --home=./goctlTpl

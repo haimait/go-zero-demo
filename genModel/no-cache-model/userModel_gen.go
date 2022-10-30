@@ -6,18 +6,17 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"strings"
-
 	"github.com/zeromicro/go-zero/core/stores/builder"
 	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/core/stringx"
+	"strings"
 )
 
 var (
 	userFieldNames          = builder.RawFieldNames(&User{})
 	userRows                = strings.Join(userFieldNames, ",")
-	userRowsExpectAutoSet   = strings.Join(stringx.Remove(userFieldNames, "`create_at`", "`created_at`", "`create_time`", "`update_at`", "`updated_at`", "`update_time`"), ",")
+	userRowsExpectAutoSet   = strings.Join(stringx.Remove(userFieldNames, "`id`", "`create_at`", "`created_at`", "`create_time`", "`update_at`", "`updated_at`", "`update_time`"), ",")
 	userRowsWithPlaceHolder = strings.Join(stringx.Remove(userFieldNames, "`id`", "`create_at`", "`created_at`", "`create_time`", "`update_at`", "`updated_at`", "`update_time`"), "=?,") + "=?"
 )
 
@@ -28,51 +27,6 @@ type (
 		FindOneByMobile(ctx context.Context, mobile string) (*User, error)
 		Update(ctx context.Context, data *User) error
 		Delete(ctx context.Context, id int64) error
-
-		//新增数据
-		Insert(ctx context.Context, session sqlx.Session, data *User) (sql.Result, error)
-
-		//软删除数据
-		DeleteSoft(ctx context.Context, session sqlx.Session, data *User) error
-
-		//更新数据
-		Update(ctx context.Context, session sqlx.Session, data *User) (sql.Result, error)
-
-		//更新数据，使用乐观锁
-		UpdateWithVersion(ctx context.Context, session sqlx.Session, data *User) error
-
-		//根据条件查询一条数据，不走缓存
-		FindOneByQuery(ctx context.Context, rowBuilder squirrel.SelectBuilder) (*User, error)
-
-		//sum某个字段
-		FindSum(ctx context.Context, sumBuilder squirrel.SelectBuilder) (float64, error)
-
-		//根据条件统计条数
-		FindCount(ctx context.Context, countBuilder squirrel.SelectBuilder) (int64, error)
-
-		//查询所有数据不分页
-		FindAll(ctx context.Context, rowBuilder squirrel.SelectBuilder, orderBy string) ([]*User, error)
-
-		//根据页码分页查询分页数据
-		FindPageListByPage(ctx context.Context, rowBuilder squirrel.SelectBuilder, page, pageSize int64, orderBy string) ([]*User, error)
-
-		//根据id倒序分页查询分页数据
-		FindPageListByIdDESC(ctx context.Context, rowBuilder squirrel.SelectBuilder, preMinId, pageSize int64) ([]*User, error)
-
-		//根据id升序分页查询分页数据
-		FindPageListByIdASC(ctx context.Context, rowBuilder squirrel.SelectBuilder, preMaxId, pageSize int64) ([]*User, error)
-
-		//暴露给logic，开启事务
-		Trans(ctx context.Context, fn func(context context.Context, session sqlx.Session) error) error
-
-		//暴露给logic，查询数据的builder
-		RowBuilder() squirrel.SelectBuilder
-
-		//暴露给logic，查询count的builder
-		CountBuilder(field string) squirrel.SelectBuilder
-
-		//暴露给logic，查询sum的builder
-		SumBuilder(field string) squirrel.SelectBuilder
 	}
 
 	defaultUserModel struct {
@@ -104,16 +58,6 @@ func (m *defaultUserModel) Delete(ctx context.Context, id int64) error {
 	query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, id)
 	return err
-}
-
-//软删除数据
-func (m *defaultUserModel) DeleteSoft(ctx context.Context, session sqlx.Session, data *User) error {
-	data.DelState = globalkey.DelStateYes
-	data.DeleteTime = time.Now()
-	if err := m.UpdateWithVersion(ctx, session, data); err != nil {
-		return errors.Wrapf(xerr.NewErrMsg("删除数据失败"), "UserModel delete err : %+v", err)
-	}
-	return nil
 }
 
 //暴露给logic开启事务
@@ -154,8 +98,9 @@ func (m *defaultUserModel) FindOneByMobile(ctx context.Context, mobile string) (
 }
 
 func (m *defaultUserModel) Insert(ctx context.Context, data *User) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?)", m.table, userRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.Id, data.Name, data.Age, data.Gender, data.Mobile, data.Password, data.DeletedAt)
+	// goctl insert
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?)", m.table, userRowsExpectAutoSet)
+	ret, err := m.conn.ExecCtx(ctx, query, data.Name, data.Age, data.Gender, data.Mobile, data.Password, data.DeletedAt)
 	return ret, err
 }
 
@@ -163,217 +108,6 @@ func (m *defaultUserModel) Update(ctx context.Context, newData *User) error {
 	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, userRowsWithPlaceHolder)
 	_, err := m.conn.ExecCtx(ctx, query, newData.Name, newData.Age, newData.Gender, newData.Mobile, newData.Password, newData.DeletedAt, newData.Id)
 	return err
-}
-
-//乐观锁修改数据 ,推荐使用
-func (m *defaultUserModel) UpdateWithVersion(ctx context.Context, session sqlx.Session, data *User) error {
-
-	oldVersion := data.Version
-	data.Version += 1
-
-	var sqlResult sql.Result
-	var err error
-
-	query := fmt.Sprintf("update %s set %s where `id` = ? and version = ? ", m.table, userRowsWithPlaceHolder)
-	if session != nil {
-		sqlResult, err = session.ExecCtx(ctx, query, newData.Name, newData.Age, newData.Gender, newData.Mobile, newData.Password, newData.DeletedAt, newData.Id, oldVersion)
-	} else {
-		sqlResult, err = m.conn.ExecCtx(ctx, query, newData.Name, newData.Age, newData.Gender, newData.Mobile, newData.Password, newData.DeletedAt, newData.Id, oldVersion)
-	}
-
-	if err != nil {
-		return err
-	}
-	updateCount, err := sqlResult.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if updateCount == 0 {
-		return xerr.NewErrCode(xerr.DB_UPDATE_AFFECTED_ZERO_ERROR)
-	}
-
-	return nil
-
-}
-
-//根据条件查询一条数据
-func (m *defaultUserModel) FindOneByQuery(ctx context.Context, rowBuilder squirrel.SelectBuilder) (*User, error) {
-
-	query, values, err := rowBuilder.Where("del_state = ?", globalkey.DelStateNo).ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	var resp User
-
-	err = m.conn.QueryRowCtx(ctx, &resp, query, values...)
-
-	switch err {
-	case nil:
-		return &resp, nil
-	default:
-		return nil, err
-	}
-}
-
-//统计某个字段总和
-func (m *defaultUserModel) FindSum(ctx context.Context, sumBuilder squirrel.SelectBuilder) (float64, error) {
-
-	query, values, err := sumBuilder.Where("del_state = ?", globalkey.DelStateNo).ToSql()
-	if err != nil {
-		return 0, err
-	}
-
-	var resp float64
-
-	err = m.conn.QueryRowCtx(ctx, &resp, query, values...)
-
-	switch err {
-	case nil:
-		return resp, nil
-	default:
-		return 0, err
-	}
-}
-
-//根据某个字段查询数据数量
-func (m *defaultUserModel) FindCount(ctx context.Context, countBuilder squirrel.SelectBuilder) (int64, error) {
-
-	query, values, err := countBuilder.Where("del_state = ?", globalkey.DelStateNo).ToSql()
-	if err != nil {
-		return 0, err
-	}
-
-	var resp int64
-
-	err = m.conn.QueryRowCtx(ctx, &resp, query, values...)
-
-	switch err {
-	case nil:
-		return resp, nil
-	default:
-		return 0, err
-	}
-}
-
-//查询所有数据
-func (m *defaultUserModel) FindAll(ctx context.Context, rowBuilder squirrel.SelectBuilder, orderBy string) ([]*User, error) {
-
-	if orderBy == "" {
-		rowBuilder = rowBuilder.OrderBy("id DESC")
-	} else {
-		rowBuilder = rowBuilder.OrderBy(orderBy)
-	}
-
-	query, values, err := rowBuilder.Where("del_state = ?", globalkey.DelStateNo).ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	var resp []*User
-
-	err = m.conn.QueryRowsCtx(ctx, &resp, query, values...)
-
-	switch err {
-	case nil:
-		return resp, nil
-	default:
-		return nil, err
-	}
-}
-
-//按照页码分页查询数据
-func (m *defaultUserModel) FindPageListByPage(ctx context.Context, rowBuilder squirrel.SelectBuilder, page, pageSize int64, orderBy string) ([]*User, error) {
-
-	if orderBy == "" {
-		rowBuilder = rowBuilder.OrderBy("id DESC")
-	} else {
-		rowBuilder = rowBuilder.OrderBy(orderBy)
-	}
-
-	if page < 1 {
-		page = 1
-	}
-	offset := (page - 1) * pageSize
-
-	query, values, err := rowBuilder.Where("del_state = ?", globalkey.DelStateNo).Offset(uint64(offset)).Limit(uint64(pageSize)).ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	var resp []*User
-
-	err = m.conn.QueryRowsCtx(ctx, &resp, query, values...)
-
-	switch err {
-	case nil:
-		return resp, nil
-	default:
-		return nil, err
-	}
-}
-
-//按照id倒序分页查询数据，不支持排序
-func (m *defaultUserModel) FindPageListByIdDESC(ctx context.Context, rowBuilder squirrel.SelectBuilder, preMinId, pageSize int64) ([]*User, error) {
-
-	if preMinId > 0 {
-		rowBuilder = rowBuilder.Where(" id < ? ", preMinId)
-	}
-
-	query, values, err := rowBuilder.Where("del_state = ?", globalkey.DelStateNo).OrderBy("id DESC").Limit(uint64(pageSize)).ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	var resp []*User
-
-	err = m.conn.QueryRowsCtx(ctx, &resp, query, values...)
-
-	switch err {
-	case nil:
-		return resp, nil
-	default:
-		return nil, err
-	}
-}
-
-//按照id升序分页查询数据，不支持排序
-func (m *defaultUserModel) FindPageListByIdASC(ctx context.Context, rowBuilder squirrel.SelectBuilder, preMaxId, pageSize int64) ([]*User, error) {
-
-	if preMaxId > 0 {
-		rowBuilder = rowBuilder.Where(" id > ? ", preMaxId)
-	}
-
-	query, values, err := rowBuilder.Where("del_state = ?", globalkey.DelStateNo).OrderBy("id ASC").Limit(uint64(pageSize)).ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	var resp []*User
-
-	err = m.conn.QueryRowsCtx(ctx, &resp, query, values...)
-
-	switch err {
-	case nil:
-		return resp, nil
-	default:
-		return nil, err
-	}
-}
-
-//暴露给logic查询数据构建条件使用的builder
-func (m *defaultUserModel) RowBuilder() squirrel.SelectBuilder {
-	return squirrel.Select(userRows).From(m.table)
-}
-
-//暴露给logic查询count构建条件使用的builder
-func (m *defaultUserModel) CountBuilder(field string) squirrel.SelectBuilder {
-	return squirrel.Select("COUNT(" + field + ")").From(m.table)
-}
-
-//暴露给logic查询构建条件使用的builder
-func (m *defaultUserModel) SumBuilder(field string) squirrel.SelectBuilder {
-	return squirrel.Select("IFNULL(SUM(" + field + "),0)").From(m.table)
 }
 
 func (m *defaultUserModel) tableName() string {

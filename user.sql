@@ -11,7 +11,7 @@
  Target Server Version : 50726
  File Encoding         : 65001
 
- Date: 30/10/2022 12:57:16
+ Date: 30/10/2022 13:43:42
 */
 
 SET NAMES utf8mb4;
@@ -22,7 +22,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`  (
-  `id` bigint(255) NOT NULL,
+  `id` bigint(255) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `age` tinyint(1) UNSIGNED NOT NULL DEFAULT 0,
   `gender` tinyint(3) NOT NULL,
@@ -33,12 +33,14 @@ CREATE TABLE `user`  (
   `deleted_at` datetime(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `mobile`(`mobile`) USING BTREE
-) ENGINE = MyISAM CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = MyISAM AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of user
 -- ----------------------------
 INSERT INTO `user` VALUES (1, 'haima', 36, 1, '18812341234', '123456', '2022-05-23 01:07:05', '2022-05-23 01:07:08', NULL);
 INSERT INTO `user` VALUES (2, 'haima02', 35, 0, '', '123456', NULL, NULL, NULL);
+INSERT INTO `user` VALUES (3, 'haima03', 35, 1, '18011111111', '123456', NULL, NULL, NULL);
+INSERT INTO `user` VALUES (4, 'haima04', 35, 1, '18011111112', '123456', NULL, NULL, NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;

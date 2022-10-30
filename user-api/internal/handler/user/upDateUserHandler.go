@@ -1,12 +1,15 @@
 package user
 
 import (
-	"net/http"
-
 	"github.com/zeromicro/go-zero/rest/httpx"
+	"go-zero-demo/common/errorx"   //④
+	"go-zero-demo/common/response" // ①
+	"go-zero-demo/pkg/validator"   // ③
 	"go-zero-demo/user-api/internal/logic/user"
 	"go-zero-demo/user-api/internal/svc"
 	"go-zero-demo/user-api/internal/types"
+	"log" // ⑤
+	"net/http"
 )
 
 func UpDateUserHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
@@ -17,12 +20,14 @@ func UpDateUserHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
+		if errMsg, errCode := validator.Validate(req); errCode != 0 {
+			log.Printf("request params validate failed, err: %s, params: %+v", errMsg, req)
+			httpx.Error(w, errorx.NewDefaultError(errMsg))
+			return
+		} // ⑥
+
 		l := user.NewUpDateUserLogic(r.Context(), svcCtx)
 		resp, err := l.UpDateUser(&req)
-		if err != nil {
-			httpx.Error(w, err)
-		} else {
-			httpx.OkJson(w, resp)
-		}
+		response.Response(w, resp, err) //②
 	}
 }
